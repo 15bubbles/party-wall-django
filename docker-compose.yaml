@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: cicd/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DEBUG=True
+    env_file:
+      - ".env"
+    volumes:
+      - "./:/app"
+    working_dir: "/app"
+    links:
+      - db
+    depends_on:
+      - db
+    restart: always
+    # command: ["gunicorn", "-c", "gunicorn.conf.py", "party_wall_django.wsgi"]
+    command: ["python", "manage.py", "runserver", "0.0.0.0:5000"]
+
+  db:
+    image: postgres:13.1
+    command:
+      ["postgres", "-c", "max_locks_per_transaction=1000"]
+    ports :
+      - "5432:5432"
+    env_file:
+      - ".env"
+    volumes:
+      - ".dbdata/:/var/lib/postgresql/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always

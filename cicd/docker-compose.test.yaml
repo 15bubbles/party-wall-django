@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ../
+      dockerfile: cicd/Dockerfile.test
+    env_file:
+      - "../.env"
+    restart: "no"
+    command: "pytest -vv"
